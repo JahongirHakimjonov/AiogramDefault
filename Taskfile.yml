@@ -1,0 +1,73 @@
+version: "3"
+
+vars:
+  RUNNER:
+    sh: 'echo {{ .RUNNER | default "uv run" }}'
+  SOURCES: src
+  SOURCES_ROOT: src
+
+tasks:
+  default:
+    cmd:
+      task: all
+
+  build:
+    desc: Build the application containers
+    env:
+      ENV: local
+    cmds:
+      - "docker compose -f docker-compose.yml up -d --build"
+
+  makemigrations:
+    desc: Create initial database migrations
+    env:
+      ENV: local
+    cmds:
+      - "docker compose exec bot uv run alembic upgrade head"
+      - "docker compose exec bot uv run alembic revision --autogenerate -m 'Initial migration'"
+
+  migrate:
+    desc: Apply database migrations
+    env:
+      ENV: local
+    cmds:
+      - "docker compose exec bot uv run alembic upgrade head"
+
+  down:
+    desc: Stop the application and remove containers
+    env:
+      ENV: local
+    cmds:
+      - "docker compose -f docker-compose.yml down"
+
+  lint:
+    desc: Lint python source files
+    cmds:
+      - "{{.RUNNER}} ruff check {{.SOURCES}}"
+      - "{{.RUNNER}} ruff format --check --diff {{.SOURCES}}"
+
+  format:
+    desc: Format python source files
+    aliases: [ "fmt" ]
+    cmds:
+      - "{{.RUNNER}} ruff format {{ .SOURCES }}"
+      - "{{.RUNNER}} ruff check --fix {{.SOURCES}}"
+
+  deptry:
+    desc: Check used dependencies with deptry
+    cmd: "{{.RUNNER}} deptry {{.SOURCES_ROOT}}"
+
+  typecheck:
+    desc: Perform type-checking
+    cmd: "{{.RUNNER}} mypy {{.SOURCES_ROOT}}"
+
+  pre-commit:
+    desc: Run pre-commit
+    cmd: uvx pre-commit run
+
+  all:
+    desc: Run the standard set of checks performed in CI
+    cmds:
+      - task: format
+      - task: deptry
+      - task: typecheck

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+echo "[INFO] Running Alembic migrations..."
+uv run alembic upgrade head
+
+echo "[INFO] Starting bot..."
+exec uv run src/main.py

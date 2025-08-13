@@ -1,0 +1,103 @@
+[project]
+name = "stars"
+version = "0.1.0"
+description = "TgStar"
+authors = [{ name = "JahongirHakimjonov", email = "jahongirhakimjonov@gmail.com" }]
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic-settings==2.0.3",
+    "pydantic==2.5.3",
+    "aiogram==3.21.0",
+    "python-dotenv==1.0.1",
+    "alembic==1.13.1",
+    "asyncpg==0.29.0",
+    "httpx[http2]==0.27.0",
+    "loguru==0.7.2",
+    "SQLAlchemy[asyncio]==2.0.29",
+    "yarl==1.9.3",
+    "psycopg2-binary==2.9.10",
+]
+
+[dependency-groups]
+dev = [
+    "deptry",
+    "black",
+    "autoflake",
+    "isort",
+    "ruff",
+    "pytz",
+    "types-pytz>=2025.2.0.20250516",
+]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "anyio"
+]
+lint = ["ruff"]
+typecheck = [
+    "mypy",
+    "asyncpg-stubs"
+]
+docker = [
+    "uvloop==0.21.0",
+    "httptools==0.6.4"
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "B", # flake8-bugbear
+    "E", # pycodestyle
+    "F", # pyflakes
+    "I", # isort
+    "S", # bandit
+    "UP", # pyupgrade
+    "W", # pycodestyle
+    "FAST", # fastapi
+]
+ignore = [
+    "B008", # function-call-in-default-argument
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/*" = ["S101"]
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+src_paths = ["src"]
+
+[tool.uv]
+default-groups = ["dev", "test", "lint", "typecheck"]
+package = true
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+disallow_any_generics = false
+pretty = true
+show_error_codes = true
+implicit_reexport = true
+warn_unused_ignores = false
+warn_return_any = false
+namespace_packages = true
+
+[[tool.mypy.overrides]]
+module = "app,core.*"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["src/tests"]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning",
+    "ignore:.*unclosed.*:ResourceWarning",
+]
+
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
